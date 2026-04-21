@@ -3,10 +3,10 @@ import { cookies } from "next/headers";
 export const ADMIN_COOKIE = "admin-token";
 
 export async function isAdmin(): Promise<boolean> {
-  const pw = process.env.ADMIN_PASSWORD;
+  const pw = process.env.ADMIN_PASSWORD?.trim();
   if (!pw) return false;
   const jar = await cookies();
-  const token = jar.get(ADMIN_COOKIE)?.value;
+  const token = jar.get(ADMIN_COOKIE)?.value?.trim();
   if (!token) return false;
   return timingSafeEqual(token, pw);
 }

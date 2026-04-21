@@ -3,15 +3,16 @@ import { ADMIN_COOKIE, timingSafeEqual } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   const { password } = (await req.json().catch(() => ({}))) as { password?: string };
-  const admin = process.env.ADMIN_PASSWORD;
+  const admin = process.env.ADMIN_PASSWORD?.trim();
   if (!admin) {
     return NextResponse.json({ error: "ADMIN_PASSWORD not set" }, { status: 500 });
   }
-  if (!password || !timingSafeEqual(password, admin)) {
+  const supplied = (password ?? "").trim();
+  if (!supplied || !timingSafeEqual(supplied, admin)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(ADMIN_COOKIE, password, {
+  res.cookies.set(ADMIN_COOKIE, admin, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

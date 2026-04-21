@@ -11,7 +11,9 @@ export default function WorldMap({ children, onClick, className }: Props) {
   return (
     <ComposableMap
       projection="geoEqualEarth"
-      projectionConfig={{ scale: 170 }}
+      projectionConfig={{ scale: 175 }}
+      width={820}
+      height={400}
       className={className}
       style={{ width: "100%", height: "auto", cursor: onClick ? "crosshair" : "default" }}
     >
