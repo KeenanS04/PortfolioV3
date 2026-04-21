@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Marker } from "react-simple-maps";
 import { AnimatePresence, motion } from "framer-motion";
 import { MapPin, X } from "lucide-react";
@@ -33,10 +33,14 @@ function groupByCity(pins: TravelPin[]): CityGroup[] {
   return Array.from(map.values());
 }
 
+const POPUP_W = 320;
+const POPUP_OFFSET = 18;
+
 export default function Travel() {
   const [pins, setPins] = useState<TravelPin[]>([]);
-  const [active, setActive] = useState<CityGroup | null>(null);
+  const [active, setActive] = useState<{ group: CityGroup; x: number; y: number; flipX: boolean; flipY: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -55,16 +59,29 @@ export default function Travel() {
 
   const groups = useMemo(() => groupByCity(pins), [pins]);
 
+  const openGroup = (g: CityGroup, evt: React.MouseEvent) => {
+    const box = containerRef.current?.getBoundingClientRect();
+    if (!box) {
+      setActive({ group: g, x: 0, y: 0, flipX: false, flipY: false });
+      return;
+    }
+    const x = evt.clientX - box.left;
+    const y = evt.clientY - box.top;
+    const flipX = x + POPUP_OFFSET + POPUP_W > box.width - 8;
+    const flipY = y + 200 > box.height - 8;
+    setActive({ group: g, x, y, flipX, flipY });
+  };
+
   return (
     <Section id="places" eyebrow="Places" title="Where I&rsquo;ve been.">
-      <div className="relative">
+      <div className="relative" ref={containerRef}>
         <div className="glass noise overflow-hidden">
           <WorldMap className="text-white">
             {groups.map((g) => (
               <Marker
                 key={g.key}
                 coordinates={g.coords}
-                onClick={() => setActive(g)}
+                onClick={(e: React.MouseEvent) => openGroup(g, e)}
                 style={{
                   default: { cursor: "pointer" },
                   hover: { cursor: "pointer" },
@@ -106,11 +123,22 @@ export default function Travel() {
         <AnimatePresence>
           {active && (
             <motion.div
-              key={active.key}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md glass glass-strong noise p-4 max-h-[75%] overflow-y-auto"
+              key={active.group.key}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
+              style={{
+                position: "absolute",
+                width: POPUP_W,
+                left: active.flipX ? undefined : active.x + POPUP_OFFSET,
+                right: active.flipX ? Math.max(8, (containerRef.current?.clientWidth ?? 0) - active.x + POPUP_OFFSET) : undefined,
+                top: active.flipY ? undefined : Math.max(8, active.y - 20),
+                bottom: active.flipY ? Math.max(8, (containerRef.current?.clientHeight ?? 0) - active.y - 20) : undefined,
+                transformOrigin: `${active.flipX ? "right" : "left"} ${active.flipY ? "bottom" : "top"}`,
+                zIndex: 20,
+              }}
+              className="glass glass-strong noise p-4 max-h-[75%] overflow-y-auto shadow-2xl"
             >
               <button
                 onClick={() => setActive(null)}
@@ -121,14 +149,14 @@ export default function Travel() {
               </button>
               <div className="flex items-center gap-2 text-sm text-white">
                 <MapPin size={14} className="text-cyan-300" />
-                {active.label}
+                {active.group.label}
               </div>
               <div className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-white/40">
-                {active.pins.length} trip{active.pins.length === 1 ? "" : "s"}
+                {active.group.pins.length} trip{active.group.pins.length === 1 ? "" : "s"}
               </div>
 
               <ul className="mt-3 space-y-4 pr-1">
-                {active.pins
+                {active.group.pins
                   .slice()
                   .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
                   .map((p) => (

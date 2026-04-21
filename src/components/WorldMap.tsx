@@ -8,13 +8,13 @@ type Props = {
 };
 
 const W = 820;
-const H = 380;
+const H = 410;
 
 export default function WorldMap({ children, onClick, className }: Props) {
   return (
     <ComposableMap
-      projection="geoEqualEarth"
-      projectionConfig={{ scale: 170, center: [0, 10] }}
+      projection="geoEquirectangular"
+      projectionConfig={{ scale: 130, center: [0, 0] }}
       width={W}
       height={H}
       className={className}
