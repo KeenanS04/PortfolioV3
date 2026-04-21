@@ -11,11 +11,11 @@ export default function WorldMap({ children, onClick, className }: Props) {
   return (
     <ComposableMap
       projection="geoEqualEarth"
-      projectionConfig={{ scale: 175 }}
-      width={820}
-      height={400}
+      projectionConfig={{ scale: 155, center: [0, 10] }}
+      width={800}
+      height={370}
       className={className}
-      style={{ width: "100%", height: "auto", cursor: onClick ? "crosshair" : "default" }}
+      style={{ width: "100%", height: "auto", display: "block", cursor: onClick ? "crosshair" : "default" }}
     >
       <Geographies geography="/world-110m.json">
         {({ geographies, projection }) => (

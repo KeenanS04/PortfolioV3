@@ -30,7 +30,7 @@ export default function Travel() {
   return (
     <Section id="places" eyebrow="Places" title="Where I&rsquo;ve been.">
       <div className="relative">
-        <div className="glass noise p-2 sm:p-4 overflow-hidden">
+        <div className="glass noise overflow-hidden">
           <WorldMap className="text-white">
             {pins.map((p) => (
               <Marker
