@@ -57,6 +57,17 @@ export default function Travel() {
     return () => clearInterval(id);
   }, []);
 
+  // Preload pin images so popups don't jank on first open.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const urls = Array.from(new Set(pins.flatMap((p) => p.images).filter(Boolean)));
+    urls.forEach((u) => {
+      const img = new window.Image();
+      img.decoding = "async";
+      img.src = u;
+    });
+  }, [pins]);
+
   const groups = useMemo(() => groupByCity(pins), [pins]);
 
   const openGroup = (g: CityGroup, evt: React.MouseEvent) => {
@@ -174,12 +185,13 @@ export default function Travel() {
                               href={src}
                               target="_blank"
                               rel="noreferrer"
-                              className="block aspect-square overflow-hidden rounded-md"
+                              className="block aspect-square overflow-hidden rounded-md bg-white/5"
                             >
                               <img
                                 src={src}
                                 alt=""
-                                loading="lazy"
+                                loading="eager"
+                                decoding="async"
                                 className="h-full w-full object-cover hover:scale-105 transition-transform"
                               />
                             </a>
