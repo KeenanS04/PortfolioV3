@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Marker } from "react-simple-maps";
 import { Trash2, LogOut, Upload, Search } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 import WorldMap from "@/components/WorldMap";
 import type { TravelPin } from "@/lib/travel";
 
@@ -65,16 +66,44 @@ export default function AdminClient() {
     setBusy(true);
     setMsg(null);
     try {
-      const fd = new FormData();
-      fd.append("name", name);
-      fd.append("city", city);
-      fd.append("lon", String(coords[0]));
-      fd.append("lat", String(coords[1]));
-      fd.append("caption", caption);
-      if (files) for (const f of Array.from(files)) fd.append("images", f);
-      const r = await fetch("/api/travel/pins", { method: "POST", body: fd });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "failed");
+      const urls: string[] = [];
+      if (files && files.length) {
+        const list = Array.from(files);
+        for (let i = 0; i < list.length; i++) {
+          const f = list[i];
+          setMsg(`Uploading ${i + 1}/${list.length}…`);
+          const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
+          const pathname = `travel/${Date.now()}-${i}.${ext}`;
+          const blob = await upload(pathname, f, {
+            access: "public",
+            handleUploadUrl: "/api/travel/upload",
+            contentType: f.type || "image/jpeg",
+          });
+          urls.push(blob.url);
+        }
+      }
+
+      setMsg("Saving pin…");
+      const r = await fetch("/api/travel/pins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          city,
+          lon: coords[0],
+          lat: coords[1],
+          caption,
+          imageUrls: urls,
+        }),
+      });
+      const text = await r.text();
+      let j: { pins?: TravelPin[]; error?: string } = {};
+      try {
+        j = JSON.parse(text);
+      } catch {
+        throw new Error(text || `HTTP ${r.status}`);
+      }
+      if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
       setPins(j.pins ?? []);
       setName("");
       setCity("");
@@ -105,7 +134,7 @@ export default function AdminClient() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="grid lg:grid-cols-2 gap-6 items-start">
       <div className="glass noise overflow-hidden">
         <WorldMap onClick={(c) => setCoords(c)}>
           {pins.map((p) => (

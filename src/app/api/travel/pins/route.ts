@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { put } from "@vercel/blob";
 import { addPin, deletePin, TravelPin } from "@/lib/travel";
 import { isAdmin } from "@/lib/auth";
 
@@ -13,42 +12,40 @@ function slug(s: string) {
     .slice(0, 40) || "pin";
 }
 
+type PinRequest = {
+  name?: string;
+  city?: string;
+  lon?: number;
+  lat?: number;
+  caption?: string;
+  imageUrls?: string[];
+};
+
 export async function POST(req: NextRequest) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   try {
-    const form = await req.formData();
-    const name = String(form.get("name") ?? "").trim();
-    const city = String(form.get("city") ?? "").trim();
-    const lon = Number(form.get("lon"));
-    const lat = Number(form.get("lat"));
-    const caption = String(form.get("caption") ?? "").trim();
-    const files = form.getAll("images").filter((f): f is File => f instanceof File);
+    const body = (await req.json().catch(() => ({}))) as PinRequest;
+    const name = (body.name ?? "").trim();
+    const city = (body.city ?? "").trim();
+    const caption = (body.caption ?? "").trim();
+    const lon = Number(body.lon);
+    const lat = Number(body.lat);
+    const imageUrls = Array.isArray(body.imageUrls) ? body.imageUrls.filter(Boolean) : [];
 
     if (!name || Number.isNaN(lon) || Number.isNaN(lat)) {
       return NextResponse.json({ error: "name, lon, lat required" }, { status: 400 });
     }
 
     const id = `${Date.now().toString(36)}-${slug(name)}`;
-    const urls: string[] = [];
-    for (const f of files) {
-      if (f.size === 0) continue;
-      const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
-      const blob = await put(`travel/${id}/${crypto.randomUUID()}.${ext}`, f, {
-        access: "public",
-        contentType: f.type || "image/jpeg",
-      });
-      urls.push(blob.url);
-    }
-
     const pin: TravelPin = {
       id,
       name,
       city: city || undefined,
       coords: [lon, lat],
       caption: caption || undefined,
-      images: urls,
+      images: imageUrls,
       createdAt: new Date().toISOString(),
     };
     const pins = await addPin(pin);
