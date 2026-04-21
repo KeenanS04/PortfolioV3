@@ -3,6 +3,7 @@ import { Redis } from "@upstash/redis";
 export type TravelPin = {
   id: string;
   name: string;
+  city?: string;
   coords: [number, number]; // [lon, lat]
   caption?: string;
   images: string[];

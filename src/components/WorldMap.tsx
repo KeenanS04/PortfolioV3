@@ -7,27 +7,62 @@ type Props = {
   className?: string;
 };
 
+const W = 820;
+const H = 380;
+
 export default function WorldMap({ children, onClick, className }: Props) {
   return (
     <ComposableMap
       projection="geoEqualEarth"
-      projectionConfig={{ scale: 155, center: [0, 10] }}
-      width={800}
-      height={370}
+      projectionConfig={{ scale: 170, center: [0, 10] }}
+      width={W}
+      height={H}
       className={className}
-      style={{ width: "100%", height: "auto", display: "block", cursor: onClick ? "crosshair" : "default" }}
+      style={{
+        width: "100%",
+        height: "auto",
+        display: "block",
+        cursor: onClick ? "crosshair" : "default",
+      }}
     >
       <Geographies geography="/world-110m.json">
         {({ geographies, projection }) => (
           <>
-            {/* Clickable invisible backdrop for placing pins */}
+            {geographies.map((geo) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                style={{
+                  default: {
+                    fill: "rgba(255,255,255,0.04)",
+                    stroke: "rgba(255,255,255,0.14)",
+                    strokeWidth: 0.4,
+                    outline: "none",
+                    pointerEvents: onClick ? "none" : undefined,
+                  },
+                  hover: {
+                    fill: "rgba(255,255,255,0.06)",
+                    stroke: "rgba(255,255,255,0.2)",
+                    strokeWidth: 0.5,
+                    outline: "none",
+                    pointerEvents: onClick ? "none" : undefined,
+                  },
+                  pressed: {
+                    fill: "rgba(255,255,255,0.06)",
+                    outline: "none",
+                    pointerEvents: onClick ? "none" : undefined,
+                  },
+                }}
+              />
+            ))}
             {onClick && (
               <rect
-                x={-10000}
-                y={-10000}
-                width={20000}
-                height={20000}
+                x={0}
+                y={0}
+                width={W}
+                height={H}
                 fill="transparent"
+                style={{ pointerEvents: "all" }}
                 onClick={(e) => {
                   const svg = (e.target as SVGElement).ownerSVGElement;
                   if (!svg) return;
@@ -42,30 +77,6 @@ export default function WorldMap({ children, onClick, className }: Props) {
                 }}
               />
             )}
-            {geographies.map((geo) => (
-              <Geography
-                key={geo.rsmKey}
-                geography={geo}
-                style={{
-                  default: {
-                    fill: "rgba(255,255,255,0.04)",
-                    stroke: "rgba(255,255,255,0.14)",
-                    strokeWidth: 0.4,
-                    outline: "none",
-                  },
-                  hover: {
-                    fill: "rgba(255,255,255,0.06)",
-                    stroke: "rgba(255,255,255,0.2)",
-                    strokeWidth: 0.5,
-                    outline: "none",
-                  },
-                  pressed: {
-                    fill: "rgba(255,255,255,0.06)",
-                    outline: "none",
-                  },
-                }}
-              />
-            ))}
             {children}
           </>
         )}

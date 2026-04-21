@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Marker } from "react-simple-maps";
 import { AnimatePresence, motion } from "framer-motion";
 import { MapPin, X } from "lucide-react";
@@ -7,9 +7,35 @@ import Section from "./Section";
 import WorldMap from "./WorldMap";
 import type { TravelPin } from "@/lib/travel";
 
+type CityGroup = {
+  key: string;
+  label: string;
+  coords: [number, number];
+  pins: TravelPin[];
+};
+
+function groupByCity(pins: TravelPin[]): CityGroup[] {
+  const map = new Map<string, CityGroup>();
+  for (const p of pins) {
+    const key = (p.city || `${p.coords[0].toFixed(2)},${p.coords[1].toFixed(2)}`).toLowerCase();
+    const existing = map.get(key);
+    if (existing) {
+      existing.pins.push(p);
+    } else {
+      map.set(key, {
+        key,
+        label: p.city || p.name,
+        coords: p.coords,
+        pins: [p],
+      });
+    }
+  }
+  return Array.from(map.values());
+}
+
 export default function Travel() {
   const [pins, setPins] = useState<TravelPin[]>([]);
-  const [active, setActive] = useState<TravelPin | null>(null);
+  const [active, setActive] = useState<CityGroup | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,16 +53,18 @@ export default function Travel() {
     return () => clearInterval(id);
   }, []);
 
+  const groups = useMemo(() => groupByCity(pins), [pins]);
+
   return (
     <Section id="places" eyebrow="Places" title="Where I&rsquo;ve been.">
       <div className="relative">
         <div className="glass noise overflow-hidden">
           <WorldMap className="text-white">
-            {pins.map((p) => (
+            {groups.map((g) => (
               <Marker
-                key={p.id}
-                coordinates={p.coords}
-                onClick={() => setActive(p)}
+                key={g.key}
+                coordinates={g.coords}
+                onClick={() => setActive(g)}
                 style={{
                   default: { cursor: "pointer" },
                   hover: { cursor: "pointer" },
@@ -44,21 +72,22 @@ export default function Travel() {
                 }}
               >
                 <g>
-                  <circle r={5} fill="#22d3ee" fillOpacity={0.15} />
-                  <circle r={2.5} fill="#22d3ee">
-                    <animate
-                      attributeName="r"
-                      values="2.5;3.5;2.5"
-                      dur="2.4s"
-                      repeatCount="indefinite"
-                    />
-                    <animate
-                      attributeName="fill-opacity"
-                      values="0.9;0.55;0.9"
-                      dur="2.4s"
-                      repeatCount="indefinite"
-                    />
+                  <circle r={6} fill="#22d3ee" fillOpacity={0.15} />
+                  <circle r={2.8} fill="#22d3ee">
+                    <animate attributeName="r" values="2.8;3.8;2.8" dur="2.4s" repeatCount="indefinite" />
+                    <animate attributeName="fill-opacity" values="0.9;0.55;0.9" dur="2.4s" repeatCount="indefinite" />
                   </circle>
+                  {g.pins.length > 1 && (
+                    <text
+                      textAnchor="middle"
+                      y={-8}
+                      fontSize={9}
+                      fill="#e5e7eb"
+                      style={{ fontWeight: 600, pointerEvents: "none" }}
+                    >
+                      {g.pins.length}
+                    </text>
+                  )}
                 </g>
               </Marker>
             ))}
@@ -77,11 +106,11 @@ export default function Travel() {
         <AnimatePresence>
           {active && (
             <motion.div
-              key={active.id}
+              key={active.key}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm glass glass-strong noise p-4"
+              className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md glass glass-strong noise p-4 max-h-[75%] overflow-y-auto"
             >
               <button
                 onClick={() => setActive(null)}
@@ -92,21 +121,46 @@ export default function Travel() {
               </button>
               <div className="flex items-center gap-2 text-sm text-white">
                 <MapPin size={14} className="text-cyan-300" />
-                {active.name}
+                {active.label}
               </div>
-              {active.caption && (
-                <p className="mt-1.5 text-xs text-white/70 leading-snug">{active.caption}</p>
-              )}
-              {active.images.length > 0 && (
-                <div className="mt-3 grid grid-cols-3 gap-1.5">
-                  {active.images.slice(0, 6).map((src) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <a key={src} href={src} target="_blank" rel="noreferrer" className="block aspect-square overflow-hidden rounded-md">
-                      <img src={src} alt="" className="h-full w-full object-cover hover:scale-105 transition-transform" loading="lazy" />
-                    </a>
+              <div className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-white/40">
+                {active.pins.length} trip{active.pins.length === 1 ? "" : "s"}
+              </div>
+
+              <ul className="mt-3 space-y-4 pr-1">
+                {active.pins
+                  .slice()
+                  .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+                  .map((p) => (
+                    <li key={p.id}>
+                      <div className="text-sm text-white">{p.name}</div>
+                      {p.caption && (
+                        <p className="mt-0.5 text-xs text-white/60 leading-snug">{p.caption}</p>
+                      )}
+                      {p.images.length > 0 && (
+                        <div className="mt-2 grid grid-cols-3 gap-1.5">
+                          {p.images.slice(0, 6).map((src) => (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <a
+                              key={src}
+                              href={src}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block aspect-square overflow-hidden rounded-md"
+                            >
+                              <img
+                                src={src}
+                                alt=""
+                                loading="lazy"
+                                className="h-full w-full object-cover hover:scale-105 transition-transform"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </li>
                   ))}
-                </div>
-              )}
+              </ul>
             </motion.div>
           )}
         </AnimatePresence>

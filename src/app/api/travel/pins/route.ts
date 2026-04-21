@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
   try {
     const form = await req.formData();
     const name = String(form.get("name") ?? "").trim();
+    const city = String(form.get("city") ?? "").trim();
     const lon = Number(form.get("lon"));
     const lat = Number(form.get("lat"));
     const caption = String(form.get("caption") ?? "").trim();
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
     const pin: TravelPin = {
       id,
       name,
+      city: city || undefined,
       coords: [lon, lat],
       caption: caption || undefined,
       images: urls,
