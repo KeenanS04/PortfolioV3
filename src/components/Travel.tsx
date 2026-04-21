@@ -135,10 +135,10 @@ export default function Travel() {
           {active && (
             <motion.div
               key={active.group.key}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.08, ease: "linear" }}
+              initial={{ opacity: 0, scale: 0.9, y: -4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
               style={{
                 position: "absolute",
                 width: POPUP_W,
