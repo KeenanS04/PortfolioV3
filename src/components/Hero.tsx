@@ -1,33 +1,35 @@
 "use client";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import Background from "@/components/Background";
 
 const skillsTicker = [
   "Python",
   "SQL",
   "PyTorch",
-  "TensorFlow",
-  "scikit-learn",
-  "Pandas",
-  "NumPy",
-  "Apache Spark",
-  "Databricks",
+  "Powerlifting",
   "Snowflake",
   "Tableau",
-  "Excel",
+  "Photography",
   "React",
   "Next.js",
   "TypeScript",
+  "Videography",
   "Swift",
-  "Flask",
   "AWS",
-  "Git",
-  "Linux",
+  "Traveling",
+  "Pandas",
+  "Storytelling",
+  "Databricks",
+  "Cooking",
+  "Excel",
+  "Film",
 ];
 
 export default function Hero() {
   return (
-    <section id="top" className="relative min-h-[92vh] flex items-center justify-center px-6 pt-28 overflow-hidden">
+    <section id="top" className="relative min-h-screen flex items-center justify-center px-6 pt-28 overflow-hidden">
+      <Background />
       <div className="relative z-10 max-w-5xl w-full text-center">
         <motion.div
           initial={{ y: 20, opacity: 0 }}
@@ -36,7 +38,7 @@ export default function Hero() {
           className="inline-flex items-center gap-2 glass px-3 py-1.5 text-xs text-white/80 mb-6"
         >
           <Sparkles size={14} className="text-cyan-300" />
-          Storyteller
+          Data Analyst · Powerlifter · Storyteller
         </motion.div>
 
         <motion.h1

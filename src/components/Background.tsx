@@ -1,30 +1,13 @@
-"use client";
-import { useEffect, useRef } from "react";
-
 export default function Background() {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const onMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 20;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
-      el.style.setProperty("--mx", `${x}px`);
-      el.style.setProperty("--my", `${y}px`);
-    };
-    window.addEventListener("mousemove", onMove);
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
-
   return (
     <div
-      ref={ref}
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
       style={{
-        transform: "translate3d(var(--mx,0), var(--my,0), 0)",
-        transition: "transform 600ms cubic-bezier(.2,.8,.2,1)",
+        maskImage:
+          "linear-gradient(to bottom, black 0%, black 65%, transparent 100%)",
+        WebkitMaskImage:
+          "linear-gradient(to bottom, black 0%, black 65%, transparent 100%)",
       }}
     >
       <div
@@ -35,11 +18,11 @@ export default function Background() {
           left: "-10vw",
           top: "-10vw",
           background:
-            "radial-gradient(circle at 30% 30%, #6366f1, transparent 60%)",
+            "radial-gradient(circle at 30% 30%, #f472b6, transparent 60%)",
         }}
       />
       <div
-        className="blob animate-float"
+        className="blob animate-drift"
         style={{
           width: "50vw",
           height: "50vw",
