@@ -7,6 +7,7 @@ import Instagram from "@/components/Instagram";
 import Nav from "@/components/Nav";
 import Projects from "@/components/Projects";
 import Skills from "@/components/Skills";
+import Travel from "@/components/Travel";
 
 export default function Page() {
   return (
@@ -18,6 +19,7 @@ export default function Page() {
       <Experience />
       <Projects />
       <Skills />
+      <Travel />
       <Instagram />
       <Contact />
     </main>
