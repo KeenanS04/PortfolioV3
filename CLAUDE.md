@@ -42,7 +42,12 @@ src/app/
 src/components/
   Nav.tsx                 # dynamic-island pill, centered via flex wrapper
                           # (framer-motion y would fight translate-x-1/2)
-  Hero.tsx                # "Storyteller" eyebrow, skills marquee with mask fade
+  Hero.tsx                # "Data Analyst · Powerlifter · Storyteller" eyebrow,
+                          # skills marquee mixes technical + lifestyle skills,
+                          # min-h-screen, mounts <Background /> scoped to hero
+  Background.tsx          # aurora blob backdrop (pink/cyan/purple) with float
+                          # + drift keyframes and a bottom linear mask so blobs
+                          # fade into the next section (no cursor parallax)
   About.tsx               # stats quadrant (TODO: 2nd paragraph + "currently exploring")
   Experience.tsx
   Projects.tsx            # GitHub repos filtered by topic = "project"
@@ -110,6 +115,7 @@ KV key: `travel:pins:v1`. `getPins`, `savePins`, `addPin`, `deletePin` in `src/l
 7. **Admin auth trims whitespace** on both the env var and the submitted password; env vars pasted from password managers often carry a trailing newline.
 8. **Nav centering**: the pill is wrapped in a static `flex justify-center` parent. A framer-motion `y` on the pill would override the Tailwind `-translate-x-1/2` approach. Don't "simplify" that wrapper away.
 9. **Grammarly browser extension** injects attributes into `<body>` post-hydration. `suppressHydrationWarning` on the body in `layout.tsx` silences the warning; don't remove it.
+10. **Background blobs must NOT use `-z-10`** on the fixed/absolute wrapper. Because `<main>` has `position: relative` without isolation, a negative z-index escapes main's paint layer and the blobs render behind the body's dark background (invisible). Use `z-0` and rely on document order (Background is the section's first child, content comes after).
 
 ## Branch workflow
 
