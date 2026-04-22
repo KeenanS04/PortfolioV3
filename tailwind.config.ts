@@ -13,11 +13,14 @@ export default {
       keyframes: {
         float: {
           "0%,100%": { transform: "translate3d(0,0,0) scale(1)" },
-          "50%": { transform: "translate3d(0,-20px,0) scale(1.05)" },
+          "25%": { transform: "translate3d(4%,-6%,0) scale(1.08)" },
+          "50%": { transform: "translate3d(-3%,-10%,0) scale(1.04)" },
+          "75%": { transform: "translate3d(-6%,-3%,0) scale(1.1)" },
         },
         drift: {
-          "0%": { transform: "translate3d(-10%,0,0)" },
-          "100%": { transform: "translate3d(10%,0,0)" },
+          "0%,100%": { transform: "translate3d(-8%,2%,0) scale(1)" },
+          "33%": { transform: "translate3d(6%,-4%,0) scale(1.06)" },
+          "66%": { transform: "translate3d(9%,4%,0) scale(1.03)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
@@ -29,8 +32,8 @@ export default {
         },
       },
       animation: {
-        float: "float 10s ease-in-out infinite",
-        drift: "drift 18s ease-in-out infinite alternate",
+        float: "float 14s ease-in-out infinite",
+        drift: "drift 20s ease-in-out infinite",
         shimmer: "shimmer 3s linear infinite",
         marquee: "marquee 30s linear infinite",
       },
