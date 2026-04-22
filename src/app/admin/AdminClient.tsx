@@ -180,18 +180,18 @@ export default function AdminClient() {
   ).sort();
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6 items-start">
+    <div className="space-y-6">
       <div className="glass noise overflow-hidden">
-        <WorldMap onClick={onMapClick}>
+        <WorldMap onClick={onMapClick} highlighted={new Set(canonicalVisited)}>
           {pins.map((p) => (
             <Marker key={p.id} coordinates={p.coords}>
-              <circle r={2.5} fill="#22d3ee" />
+              <circle r={3} fill="#fdf2f8" stroke="#f472b6" strokeWidth={0.8} />
             </Marker>
           ))}
           {coords && (
             <Marker coordinates={coords}>
-              <circle r={6} fill="#f472b6" fillOpacity={0.3} />
-              <circle r={3} fill="#f472b6" />
+              <circle r={7} fill="#fde047" fillOpacity={0.25} />
+              <circle r={3.5} fill="#fde047" />
             </Marker>
           )}
         </WorldMap>
@@ -205,6 +205,7 @@ export default function AdminClient() {
         </div>
       </div>
 
+      <div className="grid lg:grid-cols-2 gap-6 items-start">
       <form onSubmit={submit} className="glass noise p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-medium text-white">New pin</h2>
@@ -320,7 +321,7 @@ export default function AdminClient() {
         {msg && <div className="text-xs text-white/60">{msg}</div>}
       </form>
 
-      <div className="lg:col-span-2 glass noise p-5">
+      <div className="glass noise p-5">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <div className="text-xs uppercase tracking-[0.22em] text-cyan-300/80">
             Existing pins ({pins.length})
@@ -369,6 +370,7 @@ export default function AdminClient() {
             ))}
           </ul>
         )}
+      </div>
       </div>
     </div>
   );

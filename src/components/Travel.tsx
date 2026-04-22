@@ -109,17 +109,16 @@ export default function Travel() {
                 }}
               >
                 <g>
-                  <circle r={6} fill="#22d3ee" fillOpacity={0.15} />
-                  <circle r={2.8} fill="#22d3ee">
-                    <animate attributeName="r" values="2.8;3.8;2.8" dur="2.4s" repeatCount="indefinite" />
-                    <animate attributeName="fill-opacity" values="0.9;0.55;0.9" dur="2.4s" repeatCount="indefinite" />
+                  <circle r={6} fill="#f472b6" fillOpacity={0.25} />
+                  <circle r={3} fill="#fdf2f8" stroke="#f472b6" strokeWidth={0.8}>
+                    <animate attributeName="r" values="3;4;3" dur="2.4s" repeatCount="indefinite" />
                   </circle>
                   {g.pins.length > 1 && (
                     <text
                       textAnchor="middle"
                       y={-8}
                       fontSize={9}
-                      fill="#e5e7eb"
+                      fill="#fdf2f8"
                       style={{ fontWeight: 600, pointerEvents: "none" }}
                     >
                       {g.pins.length}
