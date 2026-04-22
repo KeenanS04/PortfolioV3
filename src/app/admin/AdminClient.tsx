@@ -19,6 +19,7 @@ export default function AdminClient() {
   const [coords, setCoords] = useState<[number, number] | null>(null);
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
   const [caption, setCaption] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
   const [busy, setBusy] = useState(false);
@@ -53,8 +54,22 @@ export default function AdminClient() {
   const pickResult = (r: GeoResult) => {
     setCoords([r.lon, r.lat]);
     setCity(r.city);
+    setCountry(r.country ?? "");
     setSearchResults([]);
     setSearchQ(r.city);
+  };
+
+  const onMapClick = async (c: [number, number]) => {
+    setCoords(c);
+    try {
+      const r = await fetch(`/api/geocode/reverse?lon=${c[0]}&lat=${c[1]}`);
+      if (!r.ok) return;
+      const j = (await r.json()) as { city?: string; country?: string };
+      if (j.city && !city.trim()) setCity(j.city);
+      if (j.country) setCountry(j.country);
+    } catch {
+      /* non-fatal */
+    }
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -90,6 +105,7 @@ export default function AdminClient() {
         body: JSON.stringify({
           name,
           city,
+          country,
           lon: coords[0],
           lat: coords[1],
           caption,
@@ -107,6 +123,7 @@ export default function AdminClient() {
       setPins(j.pins ?? []);
       setName("");
       setCity("");
+      setCountry("");
       setCaption("");
       setCoords(null);
       setSearchQ("");
@@ -136,7 +153,7 @@ export default function AdminClient() {
   return (
     <div className="grid lg:grid-cols-2 gap-6 items-start">
       <div className="glass noise overflow-hidden">
-        <WorldMap onClick={(c) => setCoords(c)}>
+        <WorldMap onClick={onMapClick}>
           {pins.map((p) => (
             <Marker key={p.id} coordinates={p.coords}>
               <circle r={2.5} fill="#22d3ee" />
@@ -233,6 +250,15 @@ export default function AdminClient() {
           />
         </Field>
 
+        <Field label="Country (highlights on the map)">
+          <input
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            placeholder="United States"
+            className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm outline-none focus:border-white/30"
+          />
+        </Field>
+
         <Field label="Caption (optional)">
           <textarea
             value={caption}
@@ -278,7 +304,8 @@ export default function AdminClient() {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-white truncate">{p.name}</div>
                   <div className="text-xs text-white/50 truncate">
-                    {p.city ? `${p.city} · ` : ""}
+                    {[p.city, p.country].filter(Boolean).join(", ")}
+                    {p.city || p.country ? " · " : ""}
                     {p.coords[1].toFixed(2)}, {p.coords[0].toFixed(2)} · {p.images.length} image
                     {p.images.length === 1 ? "" : "s"}
                   </div>

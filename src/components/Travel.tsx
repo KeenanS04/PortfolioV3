@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { MapPin, X } from "lucide-react";
 import Section from "./Section";
 import WorldMap from "./WorldMap";
+import { canonicalCountry } from "@/lib/countryAliases";
 import type { TravelPin } from "@/lib/travel";
 
 type CityGroup = {
@@ -69,6 +70,14 @@ export default function Travel() {
   }, [pins]);
 
   const groups = useMemo(() => groupByCity(pins), [pins]);
+  const visitedCountries = useMemo(() => {
+    const s = new Set<string>();
+    for (const p of pins) {
+      const canon = canonicalCountry(p.country);
+      if (canon) s.add(canon);
+    }
+    return s;
+  }, [pins]);
 
   const openGroup = (g: CityGroup, evt: React.MouseEvent) => {
     const box = containerRef.current?.getBoundingClientRect();
@@ -87,7 +96,7 @@ export default function Travel() {
     <Section id="places" eyebrow="Places" title="Where I&rsquo;ve been.">
       <div className="relative" ref={containerRef}>
         <div className="glass noise overflow-hidden">
-          <WorldMap className="text-white">
+          <WorldMap className="text-white" highlighted={visitedCountries}>
             {groups.map((g) => (
               <Marker
                 key={g.key}

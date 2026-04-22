@@ -5,12 +5,18 @@ type Props = {
   children?: React.ReactNode;
   onClick?: (coords: [number, number]) => void;
   className?: string;
+  /** Set of canonical Natural Earth country names to highlight. */
+  highlighted?: Set<string>;
 };
 
 const W = 820;
 const H = 410;
 
-export default function WorldMap({ children, onClick, className }: Props) {
+const VISITED_FILL = "rgba(34, 211, 238, 0.22)";
+const VISITED_FILL_HOVER = "rgba(34, 211, 238, 0.32)";
+const VISITED_STROKE = "rgba(34, 211, 238, 0.55)";
+
+export default function WorldMap({ children, onClick, highlighted, className }: Props) {
   return (
     <ComposableMap
       projection="geoEquirectangular"
@@ -28,33 +34,38 @@ export default function WorldMap({ children, onClick, className }: Props) {
       <Geographies geography="/world-110m.json">
         {({ geographies, projection }) => (
           <>
-            {geographies.map((geo) => (
-              <Geography
-                key={geo.rsmKey}
-                geography={geo}
-                style={{
-                  default: {
-                    fill: "rgba(255,255,255,0.04)",
-                    stroke: "rgba(255,255,255,0.14)",
-                    strokeWidth: 0.4,
-                    outline: "none",
-                    pointerEvents: onClick ? "none" : undefined,
-                  },
-                  hover: {
-                    fill: "rgba(255,255,255,0.06)",
-                    stroke: "rgba(255,255,255,0.2)",
-                    strokeWidth: 0.5,
-                    outline: "none",
-                    pointerEvents: onClick ? "none" : undefined,
-                  },
-                  pressed: {
-                    fill: "rgba(255,255,255,0.06)",
-                    outline: "none",
-                    pointerEvents: onClick ? "none" : undefined,
-                  },
-                }}
-              />
-            ))}
+            {geographies.map((geo) => {
+              const name = (geo.properties?.name ?? "") as string;
+              const isVisited = highlighted?.has(name) ?? false;
+              return (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  style={{
+                    default: {
+                      fill: isVisited ? VISITED_FILL : "rgba(255,255,255,0.04)",
+                      stroke: isVisited ? VISITED_STROKE : "rgba(255,255,255,0.14)",
+                      strokeWidth: isVisited ? 0.6 : 0.4,
+                      outline: "none",
+                      pointerEvents: onClick ? "none" : undefined,
+                      transition: "fill 200ms ease, stroke 200ms ease",
+                    },
+                    hover: {
+                      fill: isVisited ? VISITED_FILL_HOVER : "rgba(255,255,255,0.06)",
+                      stroke: isVisited ? VISITED_STROKE : "rgba(255,255,255,0.2)",
+                      strokeWidth: isVisited ? 0.7 : 0.5,
+                      outline: "none",
+                      pointerEvents: onClick ? "none" : undefined,
+                    },
+                    pressed: {
+                      fill: isVisited ? VISITED_FILL_HOVER : "rgba(255,255,255,0.06)",
+                      outline: "none",
+                      pointerEvents: onClick ? "none" : undefined,
+                    },
+                  }}
+                />
+              );
+            })}
             {onClick && (
               <rect
                 x={0}

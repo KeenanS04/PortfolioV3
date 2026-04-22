@@ -15,6 +15,7 @@ function slug(s: string) {
 type PinRequest = {
   name?: string;
   city?: string;
+  country?: string;
   lon?: number;
   lat?: number;
   caption?: string;
@@ -29,6 +30,7 @@ export async function POST(req: NextRequest) {
     const body = (await req.json().catch(() => ({}))) as PinRequest;
     const name = (body.name ?? "").trim();
     const city = (body.city ?? "").trim();
+    const country = (body.country ?? "").trim();
     const caption = (body.caption ?? "").trim();
     const lon = Number(body.lon);
     const lat = Number(body.lat);
@@ -43,6 +45,7 @@ export async function POST(req: NextRequest) {
       id,
       name,
       city: city || undefined,
+      country: country || undefined,
       coords: [lon, lat],
       caption: caption || undefined,
       images: imageUrls,
