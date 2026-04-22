@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Marker } from "react-simple-maps";
-import { Trash2, LogOut, Upload, Search } from "lucide-react";
+import { Trash2, LogOut, Upload, Search, Wand2 } from "lucide-react";
+import { canonicalCountry } from "@/lib/countryAliases";
 import { upload } from "@vercel/blob/client";
 import WorldMap from "@/components/WorldMap";
 import type { TravelPin } from "@/lib/travel";
@@ -150,6 +151,34 @@ export default function AdminClient() {
     window.location.reload();
   };
 
+  const backfill = async () => {
+    const missing = pins.filter((p) => !p.country).length;
+    if (missing === 0) {
+      setMsg("All pins already have a country.");
+      return;
+    }
+    if (!confirm(`Reverse-geocode ${missing} pin(s) without a country? Takes ~${missing * 1.1}s.`)) {
+      return;
+    }
+    setBusy(true);
+    setMsg(`Backfilling ${missing} pin(s)…`);
+    try {
+      const r = await fetch("/api/travel/backfill", { method: "POST" });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+      setPins(j.pins ?? []);
+      setMsg(`Backfilled ${j.touched} of ${j.total}.`);
+    } catch (e) {
+      setMsg((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const canonicalVisited = Array.from(
+    new Set(pins.map((p) => canonicalCountry(p.country)).filter((c): c is string => !!c))
+  ).sort();
+
   return (
     <div className="grid lg:grid-cols-2 gap-6 items-start">
       <div className="glass noise overflow-hidden">
@@ -292,9 +321,24 @@ export default function AdminClient() {
       </form>
 
       <div className="lg:col-span-2 glass noise p-5">
-        <div className="text-xs uppercase tracking-[0.22em] text-cyan-300/80 mb-3">
-          Existing pins ({pins.length})
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <div className="text-xs uppercase tracking-[0.22em] text-cyan-300/80">
+            Existing pins ({pins.length})
+          </div>
+          <button
+            type="button"
+            onClick={backfill}
+            disabled={busy || pins.every((p) => p.country)}
+            className="text-xs glass px-2.5 py-1 text-white/80 hover:text-white hover:bg-white/10 disabled:opacity-40 inline-flex items-center gap-1.5"
+          >
+            <Wand2 size={12} /> Backfill countries
+          </button>
         </div>
+        {canonicalVisited.length > 0 && (
+          <div className="mb-4 text-[11px] text-white/40">
+            Highlighted on map: {canonicalVisited.join(" · ")}
+          </div>
+        )}
         {pins.length === 0 ? (
           <div className="text-sm text-white/50">No pins yet.</div>
         ) : (

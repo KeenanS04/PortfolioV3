@@ -12,9 +12,9 @@ type Props = {
 const W = 820;
 const H = 410;
 
-const VISITED_FILL = "rgba(34, 211, 238, 0.22)";
-const VISITED_FILL_HOVER = "rgba(34, 211, 238, 0.32)";
-const VISITED_STROKE = "rgba(34, 211, 238, 0.55)";
+const VISITED_FILL = "rgba(34, 211, 238, 0.38)";
+const VISITED_FILL_HOVER = "rgba(34, 211, 238, 0.55)";
+const VISITED_STROKE = "rgba(165, 243, 252, 0.8)";
 
 export default function WorldMap({ children, onClick, highlighted, className }: Props) {
   return (
