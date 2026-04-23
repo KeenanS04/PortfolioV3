@@ -120,8 +120,9 @@ export default function Instagram() {
                 initial={{ opacity: 0, y: 20, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.97 }}
+                whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.5, delay: i * 0.04 }}
-                className="glass noise group relative block aspect-square overflow-hidden outline outline-1 outline-transparent hover:outline-white/80 [outline-offset:-1px] transition-[outline-color] duration-300"
+                className="glass noise group relative block aspect-square overflow-hidden"
                 style={
                   p.accent
                     ? ({
@@ -137,26 +138,26 @@ export default function Instagram() {
                   loading="lazy"
                   className="absolute inset-0 h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-80" />
 
                 <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
                   {p.mediaType === "VIDEO" && (
-                    <span className="glass px-1.5 py-1 rounded-full text-white">
+                    <span className="ig-tile-badge glass px-1.5 py-1 rounded-full text-white">
                       <Play size={11} className="fill-white" />
                     </span>
                   )}
                   {p.mediaType === "CAROUSEL_ALBUM" && (
-                    <span className="glass px-1.5 py-1 rounded-full text-white">
+                    <span className="ig-tile-badge glass px-1.5 py-1 rounded-full text-white">
                       <Layers size={11} />
                     </span>
                   )}
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-3">
-                  <p className="text-xs text-white/90 line-clamp-2 leading-snug">
+                  <p className="ig-tile-text text-xs text-white/90 line-clamp-2 leading-snug">
                     {p.caption || "—"}
                   </p>
-                  <div className="mt-1.5 text-[10px] uppercase tracking-wider text-white/50">
+                  <div className="ig-tile-meta mt-1.5 text-[10px] uppercase tracking-wider text-white/50">
                     {relTime(p.timestamp)}
                   </div>
                 </div>

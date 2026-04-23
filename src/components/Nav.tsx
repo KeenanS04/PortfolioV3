@@ -1,6 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail } from "lucide-react";
+import { Github, Linkedin, Mail, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 const links = [
   { href: "#about", label: "About" },
@@ -18,9 +20,9 @@ export default function Nav() {
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
-        className="pointer-events-auto w-[min(960px,100%)]"
+        className="pointer-events-auto w-[min(960px,100%)] flex items-center gap-3"
       >
-        <div className="glass glass-strong noise flex items-center justify-between px-4 py-2.5">
+        <div className="glass glass-strong noise flex items-center justify-between px-5 py-2.5 flex-1 min-w-0 !rounded-full">
           <a href="#top" className="flex items-center gap-2 font-semibold tracking-tight">
             <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-400 via-fuchsia-400 to-cyan-400 grid place-items-center text-sm text-white shadow-lg shadow-indigo-500/30">K</span>
             <span className="hidden sm:inline text-white/90">Keenan Serrao</span>
@@ -43,8 +45,26 @@ export default function Nav() {
             <IconLink href="mailto:keenanserrao@gmail.com" label="Email"><Mail size={16} /></IconLink>
           </div>
         </div>
+        <ThemeToggle />
       </motion.nav>
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = resolvedTheme !== "light";
+  return (
+    <button
+      type="button"
+      aria-label="Toggle theme"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className="glass glass-strong noise shrink-0 h-[54px] w-[54px] grid place-items-center !rounded-full text-white hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-black/30"
+    >
+      {mounted ? (isDark ? <Sun size={18} /> : <Moon size={18} />) : <Sun size={18} />}
+    </button>
   );
 }
 

@@ -43,22 +43,22 @@ export default function WorldMap({ children, onClick, highlighted, className }: 
                   geography={geo}
                   style={{
                     default: {
-                      fill: isVisited ? VISITED_FILL : "rgba(255,255,255,0.04)",
-                      stroke: isVisited ? VISITED_STROKE : "rgba(255,255,255,0.14)",
+                      fill: isVisited ? VISITED_FILL : "rgb(var(--map-land) / var(--map-land-a))",
+                      stroke: isVisited ? VISITED_STROKE : "rgb(var(--map-land) / var(--map-stroke-a))",
                       strokeWidth: isVisited ? 0.6 : 0.4,
                       outline: "none",
                       pointerEvents: onClick ? "none" : undefined,
                       transition: "fill 200ms ease, stroke 200ms ease",
                     },
                     hover: {
-                      fill: isVisited ? VISITED_FILL_HOVER : "rgba(255,255,255,0.06)",
-                      stroke: isVisited ? VISITED_STROKE : "rgba(255,255,255,0.2)",
+                      fill: isVisited ? VISITED_FILL_HOVER : "rgb(var(--map-land) / calc(var(--map-land-a) * 1.5))",
+                      stroke: isVisited ? VISITED_STROKE : "rgb(var(--map-land) / calc(var(--map-stroke-a) * 1.4))",
                       strokeWidth: isVisited ? 0.7 : 0.5,
                       outline: "none",
                       pointerEvents: onClick ? "none" : undefined,
                     },
                     pressed: {
-                      fill: isVisited ? VISITED_FILL_HOVER : "rgba(255,255,255,0.06)",
+                      fill: isVisited ? VISITED_FILL_HOVER : "rgb(var(--map-land) / calc(var(--map-land-a) * 1.5))",
                       outline: "none",
                       pointerEvents: onClick ? "none" : undefined,
                     },
