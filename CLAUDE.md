@@ -10,6 +10,7 @@ Personal portfolio site for **Keenan Serrao** (UCSD Data Science grad, Data Anal
 
 - **Next.js 15.5.x App Router** (TypeScript) — keep pinned to `^15.5.15` or newer; older patches have a CVE Vercel blocks on deploy.
 - **Tailwind CSS** with custom `.glass` / `.glass-strong` / `.noise` / `.gradient-border` utilities (see `src/app/globals.css`).
+- **next-themes** for light/dark theming. `attribute="class"`, `defaultTheme="system"`, `enableSystem`. Writes `html.light` / `html.dark` and persists to `localStorage.theme`.
 - **framer-motion** for entrance + popup animations.
 - **lucide-react** for icons.
 - **react-simple-maps** + TopoJSON (`public/world-110m.json`, from `world-atlas@2`), projection `geoEquirectangular`, scale 130, canvas 820×410.
@@ -40,14 +41,21 @@ src/app/
     geocode/reverse/      # admin: reverse Nominatim proxy
 
 src/components/
-  Nav.tsx                 # dynamic-island pill, centered via flex wrapper
-                          # (framer-motion y would fight translate-x-1/2)
+  ThemeProvider.tsx       # thin next-themes wrapper (class attribute, system default)
+  Nav.tsx                 # dynamic-island pill + separate circular theme toggle to
+                          # the right. Pill is fully rounded (!rounded-full) to
+                          # match the toggle's curvature. Toggle is h-[54px] w-[54px]
+                          # (includes .glass 1px border on each side).
   Hero.tsx                # "Data Analyst · Powerlifter · Storyteller" eyebrow,
                           # skills marquee mixes technical + lifestyle skills,
-                          # min-h-screen, mounts <Background /> scoped to hero
+                          # min-h-screen, mounts <Background /> scoped to hero.
+                          # NO overflow-hidden — blobs spill softly into next section.
   Background.tsx          # aurora blob backdrop (pink/cyan/purple) with float
-                          # + drift keyframes and a bottom linear mask so blobs
-                          # fade into the next section (no cursor parallax)
+                          # + drift keyframes. No mask, no overflow clipping — blobs
+                          # are sized so their radial falloff ends inside (or just
+                          # beyond) the hero, and the page `body` has overflow-x
+                          # hidden to stop horizontal scroll on wide viewports.
+                          # Grid lines + top glow use CSS vars so they swap in light.
   About.tsx               # stats quadrant (TODO: 2nd paragraph + "currently exploring")
   Experience.tsx
   Projects.tsx            # GitHub repos filtered by topic = "project"
@@ -116,6 +124,11 @@ KV key: `travel:pins:v1`. `getPins`, `savePins`, `addPin`, `deletePin` in `src/l
 8. **Nav centering**: the pill is wrapped in a static `flex justify-center` parent. A framer-motion `y` on the pill would override the Tailwind `-translate-x-1/2` approach. Don't "simplify" that wrapper away.
 9. **Grammarly browser extension** injects attributes into `<body>` post-hydration. `suppressHydrationWarning` on the body in `layout.tsx` silences the warning; don't remove it.
 10. **Background blobs must NOT use `-z-10`** on the fixed/absolute wrapper. Because `<main>` has `position: relative` without isolation, a negative z-index escapes main's paint layer and the blobs render behind the body's dark background (invisible). Use `z-0` and rely on document order (Background is the section's first child, content comes after).
+11. **Theming is CSS-var driven, not per-component.** `globals.css` defines tokens (`--tint`, `--shadow`, `--grid-line`, `--map-land`, etc.) on `:root` for dark and overrides them on `html.light`. The `.glass` / `.noise` / scrollbar / selection styles all consume the tokens so flipping a class re-themes the whole site. Component files use Tailwind `text-white/*` / `bg-white/*` / `border-white/*` classes unchanged — a block near the bottom of `globals.css` inverts those classes to dark ink under `html.light`. **If you add a new opacity variant** (say `text-white/35`), add a matching `html.light .text-white\/35` rule or it won't read in light mode.
+12. **Instagram tile caption text must stay white in both themes.** The tiles overlay a dark `from-black/70` gradient on the image regardless of theme, so the Tailwind `text-white/90` inversion would make captions unreadable on light. Use the helper classes `.ig-tile-text` / `.ig-tile-meta` / `.ig-tile-badge` (defined in `globals.css`) on those elements to pin them white in both modes.
+13. **Don't use `outline` for hover highlights on rounded overflow-hidden cards.** Chromium renders `outline` as a rectangle when `outline-offset` is non-zero or when the box is clipped, producing visible sharp corners. Use either a transition on the existing `.glass` `border` color, a scale transform (`whileHover={{ scale: 1.02 }}`), or an absolute inset-0 overlay with `box-shadow: inset 0 0 0 1px …`. All three follow `border-radius` cleanly.
+14. **Framer-motion hover transforms on a card with `overflow-hidden` + `border-radius` can flash a sharp corner for one frame** as the compositor promotes the element to its own GPU layer and the rounded clip hasn't re-applied yet. Fix: add `[will-change:transform]` so the layer is persistent, and `[clip-path:inset(0_round_<radius>)]` so clipping is a true clipping op rather than a fragile overflow mask. Projects.tsx cards are the canonical example.
+15. **Blobs should NOT be clipped.** The hero intentionally has no `overflow-hidden` and `Background.tsx` has no mask. Blobs extend past the hero on purpose — their radial gradients fall off to transparent so the edge is soft. Horizontal scroll is prevented by `html, body { overflow-x: hidden }` in `globals.css`, not by clipping the hero. Don't re-add `overflow-hidden` to the hero to "fix" overflow — it brings back the visible cutoff line.
 
 ## Branch workflow
 
