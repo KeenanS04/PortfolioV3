@@ -129,7 +129,7 @@ export default function Projects() {
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.5, delay: i * 0.04 }}
                   whileHover={{ y: -4 }}
-                  className="glass noise group relative p-5 flex flex-col min-h-[200px] overflow-hidden"
+                  className="glass noise group relative p-5 flex flex-col min-h-[200px] overflow-hidden [will-change:transform] [clip-path:inset(0_round_1.25rem)]"
                 >
                   <div
                     aria-hidden

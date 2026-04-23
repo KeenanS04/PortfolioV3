@@ -5,6 +5,56 @@
 :root {
   --bg: 10 10 15;
   --fg: 240 240 245;
+  /* surface tint = white in dark mode */
+  --tint: 255 255 255;
+  --shadow: 0 0 0;
+  --grid-line: 255 255 255;
+  --grid-line-alpha: 0.6;
+  --top-glow-alpha: 0.08;
+  --blob-opacity: 0.55;
+  --noise-blend: overlay;
+  --noise-opacity: 0.035;
+  --map-land: 255 255 255;
+  --map-land-a: 0.04;
+  --map-stroke-a: 0.14;
+}
+
+/* If the user hasn't picked a theme yet, follow the OS preference via CSS.
+   next-themes adds html.light / html.dark once it mounts; those win because
+   of selector specificity over @media. */
+@media (prefers-color-scheme: light) {
+  html:not(.dark):not(.light) {
+    --bg: 245 246 250;
+    --fg: 15 18 28;
+    --tint: 15 18 28;
+    --shadow: 30 30 40;
+    --grid-line: 15 18 28;
+    --grid-line-alpha: 0.45;
+    --top-glow-alpha: 0.18;
+    --blob-opacity: 0.35;
+    --noise-blend: multiply;
+    --noise-opacity: 0.06;
+    --map-land: 15 18 28;
+    --map-land-a: 0.10;
+    --map-stroke-a: 0.32;
+  }
+}
+
+html.light {
+  --bg: 245 246 250;
+  --fg: 15 18 28;
+  /* surface tint = dark ink in light mode */
+  --tint: 15 18 28;
+  --shadow: 30 30 40;
+  --grid-line: 15 18 28;
+  --grid-line-alpha: 0.45;
+  --top-glow-alpha: 0.18;
+  --blob-opacity: 0.35;
+  --noise-blend: multiply;
+  --noise-opacity: 0.06;
+  --map-land: 15 18 28;
+  --map-land-a: 0.10;
+  --map-stroke-a: 0.32;
 }
 
 html, body {
@@ -12,6 +62,7 @@ html, body {
   color: rgb(var(--fg));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 html { scroll-behavior: smooth; }
@@ -21,17 +72,17 @@ html { scroll-behavior: smooth; }
   position: relative;
   background: linear-gradient(
     135deg,
-    rgba(255,255,255,0.10) 0%,
-    rgba(255,255,255,0.04) 40%,
-    rgba(255,255,255,0.08) 100%
+    rgb(var(--tint) / 0.10) 0%,
+    rgb(var(--tint) / 0.04) 40%,
+    rgb(var(--tint) / 0.08) 100%
   );
   backdrop-filter: blur(22px) saturate(180%);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgb(var(--tint) / 0.12);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.18),
-    inset 0 -1px 0 rgba(255,255,255,0.05),
-    0 20px 60px -20px rgba(0,0,0,0.6);
+    inset 0 1px 0 rgb(var(--tint) / 0.18),
+    inset 0 -1px 0 rgb(var(--tint) / 0.05),
+    0 20px 60px -20px rgb(var(--shadow) / 0.6);
   border-radius: 1.25rem;
 }
 
@@ -43,10 +94,10 @@ html { scroll-behavior: smooth; }
   padding: 1px;
   background: linear-gradient(
     140deg,
-    rgba(255,255,255,0.5),
-    rgba(255,255,255,0.05) 30%,
-    rgba(255,255,255,0) 60%,
-    rgba(255,255,255,0.3)
+    rgb(var(--tint) / 0.5),
+    rgb(var(--tint) / 0.05) 30%,
+    rgb(var(--tint) / 0) 60%,
+    rgb(var(--tint) / 0.3)
   );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
@@ -67,8 +118,8 @@ html { scroll-behavior: smooth; }
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  opacity: 0.035;
-  mix-blend-mode: overlay;
+  opacity: var(--noise-opacity);
+  mix-blend-mode: var(--noise-blend);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
 }
 
@@ -79,6 +130,14 @@ html { scroll-behavior: smooth; }
           background-clip: text;
   color: transparent;
   animation: shimmer 8s linear infinite;
+}
+
+html.light .text-gradient {
+  background: linear-gradient(120deg, #1e293b 0%, #6366f1 35%, #0891b2 65%, #1e293b 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
 }
 
 .gradient-border {
@@ -107,17 +166,71 @@ html { scroll-behavior: smooth; }
   position: absolute;
   border-radius: 9999px;
   filter: blur(80px);
-  opacity: 0.55;
+  opacity: var(--blob-opacity);
   will-change: transform;
 }
 
 ::selection { background: rgba(124,58,237,0.45); color: white; }
+html.light ::selection { background: rgba(99,102,241,0.30); color: rgb(15 18 28); }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.12);
+  background: rgb(var(--tint) / 0.12);
   border-radius: 8px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--tint) / 0.22); }
+
+/* ─────────────────────────────────────────────────────────────
+   Light-mode overrides for Tailwind white-* utilities used
+   throughout the components. We invert white→ink so we don't
+   have to touch every component file.
+   ───────────────────────────────────────────────────────────── */
+html.light .text-white                  { color: rgb(15 18 28); }
+html.light .text-white\/95              { color: rgb(15 18 28 / 0.95); }
+html.light .text-white\/90              { color: rgb(15 18 28 / 0.90); }
+html.light .text-white\/80              { color: rgb(15 18 28 / 0.80); }
+html.light .text-white\/75              { color: rgb(15 18 28 / 0.78); }
+html.light .text-white\/70              { color: rgb(15 18 28 / 0.72); }
+html.light .text-white\/60              { color: rgb(15 18 28 / 0.62); }
+html.light .text-white\/55              { color: rgb(15 18 28 / 0.58); }
+html.light .text-white\/50              { color: rgb(15 18 28 / 0.55); }
+html.light .text-white\/45              { color: rgb(15 18 28 / 0.60); }
+html.light .text-white\/40              { color: rgb(15 18 28 / 0.55); }
+html.light .text-white\/30              { color: rgb(15 18 28 / 0.45); }
+
+html.light .hover\:text-white:hover     { color: rgb(15 18 28); }
+
+html.light .bg-white\/10                { background-color: rgb(15 18 28 / 0.08); }
+html.light .bg-white\/5                 { background-color: rgb(15 18 28 / 0.04); }
+html.light .hover\:bg-white\/10:hover   { background-color: rgb(15 18 28 / 0.08); }
+
+html.light .border-white\/30            { border-color: rgb(15 18 28 / 0.30); }
+html.light .border-white\/12            { border-color: rgb(15 18 28 / 0.16); }
+html.light .border-white\/10            { border-color: rgb(15 18 28 / 0.14); }
+html.light .border-white\/5             { border-color: rgb(15 18 28 / 0.08); }
+html.light .focus\:border-white\/30:focus { border-color: rgb(15 18 28 / 0.30); }
+html.light .hover\:border-white\/80:hover { border-color: rgb(15 18 28 / 0.55); }
+
+/* file: pseudo for the upload input */
+html.light .file\:bg-white\/5::file-selector-button { background-color: rgb(15 18 28 / 0.04); }
+html.light .hover\:file\:bg-white\/10:hover::file-selector-button { background-color: rgb(15 18 28 / 0.08); }
+html.light .file\:text-white\/80::file-selector-button { color: rgb(15 18 28 / 0.80); }
+html.light .file\:border-white\/10::file-selector-button { border-color: rgb(15 18 28 / 0.14); }
+
+/* The K logo gradient pill should keep its white text on its colored bg */
+html.light nav .text-white:where(:first-child) { color: rgb(255 255 255); }
+
+/* Cyan accents — too pale on light bg, deepen them */
+html.light .text-cyan-300            { color: rgb(14 116 144); }   /* cyan-700 */
+html.light .text-cyan-300\/80        { color: rgb(14 116 144 / 0.85); }
+html.light .marker\:text-cyan-300\/60 { --tw-marker-color: rgb(14 116 144 / 0.85); }
+html.light .marker\:text-cyan-300\/60::marker,
+html.light .marker\:text-cyan-300\/60 > li::marker { color: rgb(14 116 144 / 0.85); }
+
+/* Instagram tiles overlay dark gradient on the image regardless of theme,
+   so text on top must stay white in both modes. */
+html.light .ig-tile-text { color: rgba(255,255,255,0.92) !important; }
+html.light .ig-tile-meta { color: rgba(255,255,255,0.65) !important; }
+html.light .ig-tile-badge { color: rgba(255,255,255,1) !important; }
