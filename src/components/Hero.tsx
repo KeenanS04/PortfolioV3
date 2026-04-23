@@ -28,7 +28,7 @@ const skillsTicker = [
 
 export default function Hero() {
   return (
-    <section id="top" className="relative min-h-screen flex items-center justify-center px-6 pt-28 overflow-hidden">
+    <section id="top" className="relative min-h-screen flex items-center justify-center px-6 pt-28">
       <Background />
       <div className="relative z-10 max-w-5xl w-full text-center">
         <motion.div
